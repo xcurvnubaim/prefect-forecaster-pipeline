@@ -11,7 +11,7 @@ import joblib
 @task
 def train_base_model(X: pd.DataFrame, y: pd.DataFrame)-> dict:
     models = {
-        "LinearRegression": LinearRegression(),
+        # "LinearRegression": LinearRegression(),
         "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1),
         "GradientBoosting": GradientBoostingRegressor(n_estimators=100, random_state=42),
         "XGBoost": XGBRegressor(n_estimators=100, random_state=42),
@@ -27,7 +27,6 @@ def train_base_model(X: pd.DataFrame, y: pd.DataFrame)-> dict:
         joblib.dump(model, path)
         model_paths[model_name] = path
     return model_paths
-        
 
 @task
 def train_em_ensemble(model_paths: dict[str, str], X_train, y_train):

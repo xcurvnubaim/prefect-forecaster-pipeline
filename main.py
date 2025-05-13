@@ -8,6 +8,7 @@ if __name__ == "__main__":
             product_id="MP000294_KD000016_PL000037_SZ000012",
             target_column="BERAT_TOTAL",
             end_train="2021-12-31",
+            future_days=365,
             lag_days=30,
             lag_weeks=54,
             window_size=[7, 14, 30],

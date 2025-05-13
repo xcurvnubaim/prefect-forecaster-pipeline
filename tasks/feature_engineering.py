@@ -21,10 +21,10 @@ def add_rolling_features(df: pd.DataFrame, target_column: str, window_sizes: lis
         f"rolling_mean_{w}": df[target_column].rolling(window=w).mean()
         for w in window_sizes
     }
-    rolling_features.update({
-        f"rolling_std_{w}": df[target_column].rolling(window=w).std()
-        for w in window_sizes
-    })
+    # rolling_features.update({
+    #     f"rolling_std_{w}": df[target_column].rolling(window=w).std()
+    #     for w in window_sizes
+    # })
     return pd.DataFrame(rolling_features)
 
 
@@ -81,10 +81,10 @@ class ForecastFeatureEngineering:
             for w in self.window_size
         }
 
-        rolling_features.update({
-            f"rolling_std_{w}": history_df[self.target_column].iloc[total_rows - w:total_rows].std()
-            for w in self.window_size
-        })
+        # rolling_features.update({
+        #     f"rolling_std_{w}": history_df[self.target_column].iloc[total_rows - w:total_rows].std()
+        #     for w in self.window_size
+        # })
 
         return pd.DataFrame([rolling_features])
     

@@ -49,9 +49,9 @@ def plot_sales_forecast_future(y_pred, target_column: str, index: pd.DatetimeInd
 
     # Resample to weekly frequency using the specified aggregation method
     if agg == 'sum':
-        y_pred_weekly = y_pred.resample('W').sum()
+        y_pred_weekly = y_pred.resample('M').sum()
     else:
-        y_pred_weekly = y_pred.resample('W').mean()
+        y_pred_weekly = y_pred.resample('M').mean()
 
     # Plot
     plt.figure(figsize=(12, 6))

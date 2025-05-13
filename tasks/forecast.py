@@ -3,6 +3,7 @@ from tasks.feature_engineering import ForecastFeatureEngineering
 from datetime import timedelta
 import pandas as pd
 import joblib
+import numpy as np
 
 @task
 def forecast_future_sales(
@@ -56,8 +57,12 @@ def forecast_future_sales(
         # Combine all features into a single DataFrame for prediction
         future_day_features = pd.concat([lag_features, rolling_features, time_features, ramadhan_features], axis=1)
         
+        # print(future_day_features)
+
         # Make the prediction for the current day
         future_day_prediction = model.predict(future_day_features)
+
+        future_day_prediction[0] = max(0, np.round(future_day_prediction[0])) 
         
         # Store the predicted value
         predictions.append(future_day_prediction[0])
@@ -65,6 +70,8 @@ def forecast_future_sales(
         # Append the predicted value to the history DataFrame for the next iteration
         new_row = pd.DataFrame({target_column: future_day_prediction}, index=[future_dates[i]])
         history = pd.concat([history, new_row])
+
+    history.to_csv("output/history.csv", index=True)
 
     # Populate the future DataFrame with the predictions
     future_df[target_column] = predictions

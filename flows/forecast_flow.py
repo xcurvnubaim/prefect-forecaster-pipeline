@@ -1,7 +1,7 @@
 from prefect import flow
 import tasks
 from dataclasses import dataclass
-from flows.feature_engineering import feature_engineering_pipeline_concurrently, feature_engineering_pipeline_sequential
+from flows.feature_engineering import feature_engineering_pipeline_sequential
 import tasks.data
 import tasks.evaluate
 import tasks.forecast
@@ -33,6 +33,7 @@ def forecast_pipeline(config: SalesForecastConfig):
     # df_filtered.to_csv("output/test.csv", index=True)
     df_cleaned = tasks.preprocess.drop_missing_values(df_filtered)
     X_train, y_train, X_test, y_test = tasks.data.split_data(df_cleaned, config.end_train, config.target_column)
+    y_train.to_csv("output/cleaned_data.csv", index=True)
     model_paths = tasks.model.train_base_model(X_train, y_train)
     em_model_path = tasks.model.train_em_ensemble(model_paths, X_train, y_train)
     y_pred = tasks.model.predict_em_ensemble(em_model_path, X_test)
