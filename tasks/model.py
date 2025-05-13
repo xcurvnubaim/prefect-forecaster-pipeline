@@ -4,7 +4,7 @@ from xgboost import XGBRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from lightgbm import LGBMRegressor
 from catboost import CatBoostRegressor
-from tasks.ensemble import EMEnsembleRegressor
+from tasks.ensemble import BMAEnsembleRegressor
 import pandas as pd
 import joblib
 
@@ -32,7 +32,7 @@ def train_base_model(X: pd.DataFrame, y: pd.DataFrame)-> dict:
 @task
 def train_em_ensemble(model_paths: dict[str, str], X_train, y_train):
     loaded_models = {name: joblib.load(path) for name, path in model_paths.items()}
-    em_ensemble = EMEnsembleRegressor(loaded_models)
+    em_ensemble = BMAEnsembleRegressor(loaded_models)
     em_ensemble.fit(X_train, y_train)
     joblib.dump(em_ensemble, "output/models/em_ensemble.joblib")
     return "output/models/em_ensemble.joblib"
