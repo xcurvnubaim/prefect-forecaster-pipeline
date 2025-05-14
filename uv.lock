@@ -1211,6 +1211,7 @@ dependencies = [
     { name = "pandas" },
     { name = "prefect" },
     { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "xgboost" },
 ]
 
@@ -1223,6 +1224,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "prefect", specifier = ">=3.4.1" },
     { name = "scikit-learn", specifier = ">=1.6.1" },
+    { name = "scipy", specifier = ">=1.15.3" },
     { name = "xgboost", specifier = ">=3.0.0" },
 ]
 

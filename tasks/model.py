@@ -7,13 +7,14 @@ from catboost import CatBoostRegressor
 from tasks.ensemble import BMAEnsembleRegressor
 import pandas as pd
 import joblib
+import numpy as np
 
 @task
 def train_base_model(X: pd.DataFrame, y: pd.DataFrame)-> dict:
     models = {
         # "LinearRegression": LinearRegression(),
-        "RandomForest": RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1),
-        "GradientBoosting": GradientBoostingRegressor(n_estimators=100, random_state=42),
+        "RandomForest": RandomForestRegressor(n_estimators=50, random_state=42, n_jobs=-1),
+        "GradientBoosting": GradientBoostingRegressor(n_estimators=50, random_state=42),
         "XGBoost": XGBRegressor(n_estimators=100, random_state=42),
         "LightGBM": LGBMRegressor(n_estimators=100, random_state=42, verbose=-1),
         "CatBoost": CatBoostRegressor(n_estimators=100, random_state=42, verbose=0),
@@ -40,4 +41,5 @@ def train_em_ensemble(model_paths: dict[str, str], X_train, y_train):
 @task
 def predict_em_ensemble(model_path: str, X_test):
     em_model = joblib.load(model_path)
-    return em_model.predict(X_test)
+    predictions = em_model.predict(X_test)
+    return np.maximum(np.round(predictions), 0)

@@ -18,7 +18,7 @@ def add_lag_features(df: pd.DataFrame, target_column: str, lag_days: int, lag_we
 @task
 def add_rolling_features(df: pd.DataFrame, target_column: str, window_sizes: list[int]) -> pd.DataFrame:
     rolling_features = {
-        f"rolling_mean_{w}": df[target_column].rolling(window=w).mean()
+        f"rolling_mean_{w}": df[target_column].shift(1).rolling(window=w).mean()
         for w in window_sizes
     }
     # rolling_features.update({
@@ -73,14 +73,14 @@ class ForecastFeatureEngineering:
     
     def add_rolling_features(self, history_df: pd.DataFrame) -> pd.DataFrame:
         # Total number of rows
-        total_rows = len(history_df)
+        # total_rows = len(history_df)
 
         # Generate rolling features for the last record using iloc
         rolling_features = {
-            f"rolling_mean_{w}": history_df[self.target_column].iloc[total_rows - w:total_rows].mean()
+            f"rolling_mean_{w}": history_df[self.target_column].iloc[-w:].mean()
             for w in self.window_size
         }
-
+        # print(rolling_features)
         # rolling_features.update({
         #     f"rolling_std_{w}": history_df[self.target_column].iloc[total_rows - w:total_rows].std()
         #     for w in self.window_size

@@ -21,29 +21,39 @@ class SalesForecastConfig:
     window_size: list[int] = (7, 14, 30)
     frequency: str = "D"
     future_days: int = 365
+    use_test: bool = False
     
 
 @flow(name="Sales Forecast Pipeline")
 def forecast_pipeline(config: SalesForecastConfig):
     df = tasks.data.load_sales_data(config.file_path, config.date_column)
+    df.to_csv("output/raw_data.csv", index=True)
     df_filtered = tasks.data.filter_products(df, config.product_id, config.target_column)
     df_filtered = tasks.preprocess.aggregate_sales_data(df_filtered, config.frequency)
     df_filtered = tasks.preprocess.handle_missing_dates(df_filtered)
     df_filtered = feature_engineering_pipeline_sequential(df_filtered, config.target_column, config.lag_days, config.lag_weeks, config.window_size)
-    # df_filtered.to_csv("output/test.csv", index=True)
+    df_filtered.to_csv("output/test.csv", index=True)
     df_cleaned = tasks.preprocess.drop_missing_values(df_filtered)
-    X_train, y_train, X_test, y_test = tasks.data.split_data(df_cleaned, config.end_train, config.target_column)
-    y_train.to_csv("output/cleaned_data.csv", index=True)
-    model_paths = tasks.model.train_base_model(X_train, y_train)
-    em_model_path = tasks.model.train_em_ensemble(model_paths, X_train, y_train)
-    y_pred = tasks.model.predict_em_ensemble(em_model_path, X_test)
-    evaluation_results = tasks.evaluate.evaluate_model(y_test, y_pred)
-    print(evaluation_results)
-    tasks.visualization.plot_sales_forecast(y_test, y_pred, config.target_column, X_test.index) 
+    df_cleaned.to_csv("output/cleaned_data.csv", index=True)
+    if config.use_test:
+        X_train, y_train, X_test, y_test = tasks.data.split_data(df_cleaned, config.end_train, config.target_column)
+        # y_train.to_csv("output/cleaned_data.csv", index=True)
+        model_paths = tasks.model.train_base_model(X_train, y_train)
+        em_model_path = tasks.model.train_em_ensemble(model_paths, X_train, y_train)
+        y_pred = tasks.model.predict_em_ensemble(em_model_path, X_test)
+        evaluation_results = tasks.evaluate.evaluate_model(y_test, y_pred)
+        print(evaluation_results)
+        tasks.visualization.plot_sales_forecast(y_test, y_pred, config.target_column, X_test.index)
+    else:
+        X = df_cleaned.drop(columns=[config.target_column])
+        y = df_cleaned[config.target_column]
+        model_paths = tasks.model.train_base_model(X, y)
+        em_model_path = tasks.model.train_em_ensemble(model_paths, X, y)
+       
     future_sales = tasks.forecast.forecast_future_sales(
         model_path=em_model_path,
         n_days=config.future_days,
-        history=df_filtered,
+        history=df_cleaned,
         target_column=config.target_column,
         lag_days=config.lag_days,
         lag_weeks=config.lag_weeks,

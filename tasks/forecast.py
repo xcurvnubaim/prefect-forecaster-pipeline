@@ -41,7 +41,7 @@ def forecast_future_sales(
     # Generate future dates
     last_date = history.index[-1]
     future_dates = pd.date_range(start=last_date + pd.Timedelta(days=1), periods=n_days)
-    
+
     # Create a DataFrame for future dates
     future_df = pd.DataFrame(index=future_dates)
 
@@ -60,16 +60,18 @@ def forecast_future_sales(
         # print(future_day_features)
 
         # Make the prediction for the current day
-        future_day_prediction = model.predict(future_day_features)
-
-        future_day_prediction[0] = max(0, np.round(future_day_prediction[0])) 
+        future_day_prediction = max(0, round(model.predict(future_day_features)[0]))
         
         # Store the predicted value
-        predictions.append(future_day_prediction[0])
+        predictions.append(future_day_prediction)
         
-        # Append the predicted value to the history DataFrame for the next iteration
-        new_row = pd.DataFrame({target_column: future_day_prediction}, index=[future_dates[i]])
-        history = pd.concat([history, new_row])
+        # Create a full row for the predicted day including all features and the target
+        full_row = future_day_features.copy()
+        full_row[target_column] = future_day_prediction
+        full_row.index = [future_dates[i]]
+
+        # Append the full row to history
+        history = pd.concat([history, full_row])
 
     history.to_csv("output/history.csv", index=True)
 
